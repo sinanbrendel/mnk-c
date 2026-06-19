@@ -6,7 +6,7 @@
 
 #define M 20
 #define N 20
-#define K 3
+#define K 6
 #define P 4
 #define Q 2
 #define INPUT_SIZE 20
@@ -255,7 +255,7 @@ void find_winner(int* winner, int* start_row, int* start_col, int* end_row, int*
   return;
 }
 
-void print_winner(void) {
+void print_winner(bool* restart) {
   int winner;
   int start_row;
   int start_col;
@@ -267,6 +267,7 @@ void print_winner(void) {
   printf("Player %d has won the game, from (%.2d, %.2d) to (%.2d, %.2d)\n", winner-1, start_col, start_row, end_col, end_row);
   printf("-------------------------------------\n\n");
   printf("Clearing Board, starting new game:\n\n");
+  *restart = true;
   // it does not start a new game correctly yet. It would have to start with q values first
   for (int row = 0; row < N; row++) for(int col = 0; col < M; col++) board[row][col] = 0;
   print_board();
@@ -274,20 +275,25 @@ void print_winner(void) {
 
 int main(void) {
   bool player_2_turn = false;
+  bool restart = true;
   print_board();
 
-  for (int q = 0; q < Q; q++) {
-    get_next_entry(player_2_turn);
-    print_board();
-    print_winner();
-  }
-  player_2_turn = true;
-
   while (true) {
-    for (int p = 0; p < P; p++) {
-      get_next_entry(player_2_turn);
-      print_board();
-      print_winner();
+    if (restart) {
+      restart = false;
+      for (int q = 0; q < Q; q++) {
+        if (restart) continue;
+        get_next_entry(player_2_turn);
+        print_board();
+        print_winner(&restart);
+      }
+    } else {
+      for (int p = 0; p < P; p++) {
+        if (restart) continue;
+        get_next_entry(player_2_turn);
+        print_board();
+        print_winner(&restart);
+      }
     }
     player_2_turn = !player_2_turn;
   }
