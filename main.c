@@ -7,8 +7,8 @@
 #define M 20
 #define N 20
 #define K 3
-#define P 2
-#define Q 1
+#define P 4
+#define Q 2
 #define INPUT_SIZE 20
 
 uint_least8_t board[M][N] = {};
@@ -52,11 +52,18 @@ void print_board(void) {
   for (int row = 0; row < N + 2; row++) { // + 2 for number rows
     for (int col = 0; col < M + 2; col++) { // + 2 for number cols
       if ((row <= 0 || row >= N + 1) && !(col <= 0 || col >= M + 1)) { // number rows
+        // handled case "is in left and right panels, and not in top and bottom panels"
         printf(" %.2d ", col);
         continue;
       }
       if ((col <= 0 || col >= M + 1) && !(row <= 0 || row >= N + 1)) { // number cols
+        // handled case "is in top and bottom panels, and not in left and right panels"
         printf(" %.2d ", row);
+        continue;
+      }
+      if ((col <= 0 || col >= M + 1) || (row <= 0 || row >= N + 1)) { // number cols
+        // now handle case "is in any panels" (aka the corners, because the other cases are dealt with)
+        printf(" # ", row);
         continue;
       }
 
