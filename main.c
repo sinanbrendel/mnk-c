@@ -3,15 +3,19 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <unistd.h>
 
 #define M 20
 #define N 20
 #define K 6
-#define P 4
-#define Q 2
+#define P 2
+#define Q 1
 #define INPUT_SIZE 20
 
+#define BOARD_LINE 0
+
 uint_least8_t board[M][N] = {};
+int line = 0;
 
 bool validate_coord(long x, long y) {
   return (((x >= 0 && x < M) && (y >= 0 && y < N)) && board[y][x] == 0);
@@ -31,16 +35,28 @@ long get_input(void) {
 
 bool get_next_entry(bool player) {
   static long x_pos, y_pos;
+  int start_line = line;
 
   do {
     printf("Player: %d\n", player);
+    line++;
     printf("Enter x-position: ");
     x_pos = get_input() - 1;
-
+    line++;
     printf("Enter y-position: ");
     y_pos = get_input() - 1;
+    line++;
     printf("\n");
+    line++;
+    for (int i = 0; i < line-start_line; i++) {
+      printf("\033[1A");
+      printf("\033[2K");
+    }
+    line-=line-start_line;
+    //printf("\033[%dA", line-start_line);
   } while (!validate_coord(x_pos, y_pos));
+
+
 
   board[y_pos][x_pos] = player + 1;
   return true;
@@ -49,6 +65,8 @@ bool get_next_entry(bool player) {
 void print_board(void) {
   const char player_1 = 'X', player_2 = 'O';
 
+  printf("\033[%dA", line-BOARD_LINE);
+  line = BOARD_LINE;
   for (int row = 0; row < N + 2; row++) { // + 2 for number rows
     for (int col = 0; col < M + 2; col++) { // + 2 for number cols
       if ((row <= 0 || row >= N + 1) && !(col <= 0 || col >= M + 1)) { // number rows
@@ -74,6 +92,7 @@ void print_board(void) {
       if (col > 0 && col < M) printf("|"); // vertical separator
     }
     printf("\n");
+    line++;
 
     if (row < 1 || row > N - 1) continue; // skip horizontal separator
     for (int col = 0; col < M; col++) {
@@ -82,8 +101,10 @@ void print_board(void) {
       if (col < M - 1) printf("+");
     }
     printf("\n");
+    line++;
   }
   printf("\n");
+  line++;
 }
 
 void find_winner(int* winner, int* start_row, int* start_col, int* end_row, int* end_col) {
@@ -263,11 +284,40 @@ void print_winner(bool* restart) {
   int end_col;
   find_winner(&winner, &start_row, &start_col, &end_row, &end_col);
   if (winner == 0) return;
-  printf("\n-------------------------------------\n");
+
+  int start_line = line;
+
+  printf("-------------------------------------\n");
+  line++;
   printf("Player %d has won the game, from (%.2d, %.2d) to (%.2d, %.2d)\n", winner-1, start_col, start_row, end_col, end_row);
+  line++;
   printf("-------------------------------------\n\n");
-  printf("Clearing Board, starting new game:\n\n");
+  line+=2;
+  printf("Clearing Board, starting new game: ");
+  fflush(stdout);
   *restart = true;
+
+  for (int i = 0; i < 3; i++) {
+    printf(".");
+    fflush(stdout);
+    sleep(1);
+/*    printf("\033[3D"); //3 characters to the left
+    printf("   ");
+    printf("\033[3D"); //3 characters to the left
+    */
+  }
+  printf("\n");
+  line++;
+
+  for (int i = 0; i < line-start_line; i++) {
+    printf("\033[1A");
+    printf("\033[2K");
+  }
+  line-=line-start_line;
+
+
+
+  print_board();
   // it does not start a new game correctly yet. It would have to start with q values first
   for (int row = 0; row < N; row++) for(int col = 0; col < M; col++) board[row][col] = 0;
   print_board();
@@ -276,6 +326,7 @@ void print_winner(bool* restart) {
 int main(void) {
   bool player_2_turn = false;
   bool restart = true;
+  int line = 0;
   print_board();
 
   while (true) {
