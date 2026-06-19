@@ -134,6 +134,123 @@ void find_winner(int* winner, int* start_row, int* start_col, int* end_row, int*
     }
   }
 
+  //check "forward slash" diagonals (/), if long enough
+  //forward slash starting at i'th row has i elements, row>0 caps iterated columns at 1
+  //forward slash starting at n'th row has n elements, row>0 caps iterated columns at n
+  //forward slash starting at n+1'th "row" has n-1 elements, column starts at 1+1=2=n+1-n+1
+  //forward slash starting at n+n'th "row" has n-n=0 elements, column starts at 1+n
+  //so we need to check slashes starting between rows K and N+N-1, columns start at row-n+1
+  //4, 10-(4-1) = 10-3=7
+  for (int row_0 = K-1; row_0 < 2*N-1; row_0++) {
+    int col_start = 0;
+    int row_start = row_0;
+    if (row_0 > N) {
+      col_start = row_0-N+1;
+      row_start = N;
+    }
+
+    //printf("row_0: %d", row_0);
+    int current_length = 0;
+
+    if (board[row_start][0] != 0) current_length++; //first occurence of player
+    
+    //we now have to increment columns and decrement rows at the same time
+
+    for (int row = row_0, col = col_start; row >= 0 || col < M; row--, col++) {
+      if (board[row][col] == 0) current_length = 0; //reset because no player
+      else if (board[row+1][col-1] == board[row][col]) current_length++; //another occurence
+      else current_length = 1; //first occurence of player
+      //printf("row_0: %d, row: %d, col: %d, curr_len: %d\n", row_0, row, col, current_length);
+
+      if (current_length >= K) {
+        *winner = board[row][col];
+        *end_row = row+1;
+        *end_col = col+1;
+        *start_row = (row+1) + current_length - 1;
+        *start_col = (col+1) - current_length + 1;
+        //printf("curr_length: %d, winner = %d, start_row = %d, start_col = %d, end_row = %d, end_col = %d\n", current_length, winner, *start_row, *start_col, *end_row, *end_col);
+        return;
+      }
+    }
+  }
+
+  //check "backward slash" diagonals (\)
+  //the right way? 
+  //1. set col = 1, row = N;
+  //2. check diagonal beginning at (col, row);
+  //3. if row=1: col++ goto 5;
+  //4. else: row--; goto 2;
+  //5. if col>M: return;
+  //6. check diagonal beginning at (col, row);
+  //7. col++; goto 5;
+  for (int row_start = N-1; row_start >= 0; row_start--) {
+    int col_start = 1;
+
+    //DUPLICATE CODE -- START
+    int current_length = 0;
+
+    if (board[row_start][col_start] != 0) current_length++; //first occurence of player
+    
+    //we now have to increment columns and decrement rows at the same time
+
+    for (int row = row_start, col = col_start; row < N || col < M; row++, col++) {
+      if (board[row][col] == 0) current_length = 0; //reset because no player
+      else if (board[row-1][col-1] == board[row][col]) current_length++; //another occurence
+      else current_length = 1; //first occurence of player
+      //printf("row_0: %d, row: %d, col: %d, curr_len: %d\n", row_0, row, col, current_length);
+
+      if (current_length >= K) {
+        *winner = board[row][col];
+        *end_row = row+1;
+        *end_col = col+1;
+        *start_row = (row+1) - current_length + 1;
+        *start_col = (col+1) - current_length + 1;
+        //printf("curr_length: %d, winner = %d, start_row = %d, start_col = %d, end_row = %d, end_col = %d\n", current_length, winner, *start_row, *start_col, *end_row, *end_col);
+        return;
+      }
+    }
+    //DUPLICATE CODE -- END
+
+  }
+  for (int col_start = 2; col_start < M; col_start++) {
+    int row_start = 1;
+
+    //DUPLICATE CODE -- START
+    int current_length = 0;
+
+    if (board[row_start][col_start] != 0) current_length++; //first occurence of player
+    
+    //we now have to increment columns and decrement rows at the same time
+
+    for (int row = row_start, col = col_start; row < N || col < M; row++, col++) {
+      if (board[row][col] == 0) current_length = 0; //reset because no player
+      else if (board[row-1][col-1] == board[row][col]) current_length++; //another occurence
+      else current_length = 1; //first occurence of player
+      //printf("row_0: %d, row: %d, col: %d, curr_len: %d\n", row_0, row, col, current_length);
+
+      if (current_length >= K) {
+        *winner = board[row][col];
+        *end_row = row+1;
+        *end_col = col+1;
+        *start_row = (row+1) - current_length + 1;
+        *start_col = (col+1) - current_length + 1;
+        //printf("curr_length: %d, winner = %d, start_row = %d, start_col = %d, end_row = %d, end_col = %d\n", current_length, winner, *start_row, *start_col, *end_row, *end_col);
+        return;
+      }
+    }
+    //DUPLICATE CODE -- END
+  }
+  for (int row_0 = K-1; row_0 < 2*N-1; row_0++) {
+    int col_start = 0;
+    int row_start = row_0;
+    if (row_0 > N) {
+      col_start = row_0-N+1;
+      row_start = N;
+    }
+
+    //printf("row_0: %d", row_0);
+  }
+
   *winner = 0;
   return;
 }
