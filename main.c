@@ -111,22 +111,28 @@ void find_winner(int* winner, int* start_row, int* start_col, int* end_row, int*
     }
   }
 
-  /*
   //check all columns
   for (int col = 0; col < M; col++) {
     int current_length = 0;
 
-    if (board[1][col] != 0) current_length++;
+    if (board[1][col] != 0) current_length++; //first occurence of player
 
     for (int row = 1; row < N; row++) {
-      if (board[row][col] == 0) current_length = 0;
-      else if (board[row-1][col] == board[row][col]) current_length++;
-      else current_length = 0;
+      if (board[row][col] == 0) current_length = 0; //reset because no player
+      else if (board[row-1][col] == board[row][col]) current_length++; //another occurence
+      else current_length = 1; //first occurence of player
 
-      if (current_length >= K) return board[row][col];
+      if (current_length >= K) {
+        *winner = board[row][col];
+        *end_row = row+1;
+        *end_col = col+1;
+        *start_row = (row+1) - current_length + 1;
+        *start_col = (col+1);
+        //printf("curr_length: %d, winner = %d, start_row = %d, start_col = %d, end_row = %d, end_col = %d\n", current_length, winner, *start_row, *start_col, *end_row, *end_col);
+        return;
+      }
     }
   }
-  */
 
   *winner = 0;
   return;
