@@ -4,64 +4,75 @@
 #include <stdbool.h>
 #include <string.h>
 
+#define M 20
+#define N 20
+#define K 3
+#define P 2
+#define Q 1
 #define INPUT_SIZE 20
 
-typedef struct {
-  long x;
-  long y;
-  bool player;
-} Entry;
+uint_least8_t board[M][N] = {};
 
-long get_input() {
+bool validate_coord(long x, long y) {
+  return (((x >= 0 && x < M) && (y >= 0 && y < N)) && board[y][x] == 0);
+}
+
+long get_input(void) {
   static char buffer[INPUT_SIZE];
 
   if (fgets(buffer, INPUT_SIZE, stdin) != NULL) {
-    if (!strchr(buffer, '\n')) {
+    if (!strchr(buffer, '\n')) { // input was larger than buffer
       char c;
-      while ((c = getchar()) != '\n' && c != EOF);
+      while ((c = getchar()) != '\n' && c != EOF); // empty out stdin
     }
   }
   return strtol(buffer, NULL, 10);
 }
 
-Entry get_next_entry(bool player) {
+bool get_next_entry(bool player) {
   static long x_pos, y_pos;
 
-  printf("Player: %d\n", player);
-  printf("Enter x-position: ");
-  x_pos = get_input();
+  do {
+    printf("Player: %d\n", player);
+    printf("Enter x-position: ");
+    x_pos = get_input() - 1;
 
-  printf("Enter y-position: ");
-  y_pos = get_input();
-  printf("\n");
+    printf("Enter y-position: ");
+    y_pos = get_input() - 1;
+    printf("\n");
+  } while (!validate_coord(x_pos, y_pos));
 
-  Entry entry = {x_pos, y_pos, player};
-  return entry;
+  board[y_pos][x_pos] = player + 1;
+  return true;
 }
 
-void print_board(Entry entry) {
-  long m = 15, n = 10;
+void print_board(void) {
+  const char player_1 = 'X', player_2 = 'O';
 
-  for (int row = 0; row < n + 2; row++) { // + 2 for number rows
-    for (int col = 0; col < m + 2; col++) { // + 2 for number cols
-      if ((row == 0 || row == n + 1) && (col > 0 && col < m + 1)) { // number rows
+  for (int row = 0; row < N + 2; row++) { // + 2 for number rows
+    for (int col = 0; col < M + 2; col++) { // + 2 for number cols
+      if ((row <= 0 || row >= N + 1) && !(col <= 0 || col >= M + 1)) { // number rows
         printf(" %.2d ", col);
         continue;
       }
-      if ((col == 0 || col == m + 1) && (row > 0 && row < n + 1)) { // number cols
+      if ((col <= 0 || col >= M + 1) && !(row <= 0 || row >= N + 1)) { // number cols
         printf(" %.2d ", row);
         continue;
       }
-      printf("   "); // cell
-      if (col > 0 && col < m) printf("|"); // vertical separator
+
+      char cell = ' ';
+      if (board[row - 1][col - 1] == 1) cell = player_1;
+      if (board[row - 1][col - 1] == 2) cell = player_2;
+      printf(" %c ", cell); // cell
+      if (col > 0 && col < M) printf("|"); // vertical separator
     }
     printf("\n");
 
-    if (row < 1 || row > n - 1) continue; // skip horizontal separator
-    for (int col = 0; col < m; col++) {
+    if (row < 1 || row > N - 1) continue; // skip horizontal separator
+    for (int col = 0; col < M; col++) {
       if (col == 0) printf("    "); // offset to match numbered rows
       printf("---");
-      if (col < m - 1) printf("+");
+      if (col < M - 1) printf("+");
     }
     printf("\n");
   }
@@ -69,12 +80,21 @@ void print_board(Entry entry) {
 }
 
 int main(void) {
-  Entry entry;
-  bool player2_turn = false;
+  bool player_2_turn = false;
+  print_board();
+
+  for (int q = 0; q < Q; q++) {
+    get_next_entry(player_2_turn);
+    print_board();
+  }
+  player_2_turn = true;
+
   while (true) {
-    entry = get_next_entry(player2_turn);
-    print_board(entry);
-    player2_turn = !player2_turn;
+    for (int p = 0; p < P; p++) {
+      get_next_entry(player_2_turn);
+      print_board();
+    }
+    player_2_turn = !player_2_turn;
   }
 }
 
