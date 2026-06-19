@@ -86,6 +86,69 @@ void print_board(void) {
   printf("\n");
 }
 
+void find_winner(int* winner, int* start_row, int* start_col, int* end_row, int* end_col) {
+  //check all rows
+  for (int row = 0; row < N; row++) {
+    int current_length = 0;
+
+    if (board[row][0] != 0) current_length++; //first occurence of player
+
+    for (int col = 1; col < M; col++) {
+      if (board[row][col] == 0) current_length = 0; //reset because no player
+      else if (board[row][col-1] == board[row][col]) current_length++; //another occurence
+      else current_length = 1; //first occurence of player
+
+      if (current_length >= K) {
+        *winner = board[row][col];
+        *end_row = row+1;
+        *end_col = col+1;
+        *start_row = row+1;
+        *start_col = (col+1) - current_length + 1;
+        //printf("curr_length: %d, winner = %d, start_row = %d, start_col = %d, end_row = %d, end_col = %d\n", current_length, winner, *start_row, *start_col, *end_row, *end_col);
+        return;
+      }
+
+    }
+  }
+
+  /*
+  //check all columns
+  for (int col = 0; col < M; col++) {
+    int current_length = 0;
+
+    if (board[1][col] != 0) current_length++;
+
+    for (int row = 1; row < N; row++) {
+      if (board[row][col] == 0) current_length = 0;
+      else if (board[row-1][col] == board[row][col]) current_length++;
+      else current_length = 0;
+
+      if (current_length >= K) return board[row][col];
+    }
+  }
+  */
+
+  *winner = 0;
+  return;
+}
+
+void print_winner(void) {
+  int winner;
+  int start_row;
+  int start_col;
+  int end_row;
+  int end_col;
+  find_winner(&winner, &start_row, &start_col, &end_row, &end_col);
+  if (winner == 0) return;
+  printf("\n-------------------------------------\n");
+  printf("Player %d has won the game, from (%.2d, %.2d) to (%.2d, %.2d)\n", winner-1, start_col, start_row, end_col, end_row);
+  printf("-------------------------------------\n\n");
+  printf("Clearing Board, starting new game:\n\n");
+  // it does not start a new game correctly yet. It would have to start with q values first
+  for (int row = 0; row < N; row++) for(int col = 0; col < M; col++) board[row][col] = 0;
+  print_board();
+}
+
 int main(void) {
   bool player_2_turn = false;
   print_board();
@@ -93,6 +156,7 @@ int main(void) {
   for (int q = 0; q < Q; q++) {
     get_next_entry(player_2_turn);
     print_board();
+    print_winner();
   }
   player_2_turn = true;
 
@@ -100,6 +164,7 @@ int main(void) {
     for (int p = 0; p < P; p++) {
       get_next_entry(player_2_turn);
       print_board();
+      print_winner();
     }
     player_2_turn = !player_2_turn;
   }
