@@ -11,7 +11,7 @@
 #define Q 1
 #define INPUT_SIZE 20
 
-uint_least8_t board[M][N] = {};
+uint_least8_t board[M][N];
 
 bool validate_coord(long x, long y) {
   return (((x >= 0 && x < M) && (y >= 0 && y < N)) && board[y][x] == 0);
