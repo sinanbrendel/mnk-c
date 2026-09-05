@@ -1,21 +1,11 @@
+#include "main.h"
+#include "board.h"
+#include "game.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
-#include <stdbool.h>
 #include <string.h>
-
-#define M 20
-#define N 20
-#define K 3
-#define P 2
-#define Q 1
-#define INPUT_SIZE 20
-
-uint_least8_t board[M][N];
-
-bool validate_coord(long x, long y) {
-  return (((x >= 0 && x < M) && (y >= 0 && y < N)) && board[y][x] == 0);
-}
 
 long get_input(void) {
   static char buffer[INPUT_SIZE];
@@ -29,25 +19,8 @@ long get_input(void) {
   return strtol(buffer, NULL, 10);
 }
 
-bool get_next_entry(bool player) {
-  static long x_pos, y_pos;
-
-  do {
-    printf("Player: %d\n", player);
-    printf("Enter x-position: ");
-    x_pos = get_input() - 1;
-
-    printf("Enter y-position: ");
-    y_pos = get_input() - 1;
-    printf("\n");
-  } while (!validate_coord(x_pos, y_pos));
-
-  board[y_pos][x_pos] = player + 1;
-  return true;
-}
-
 void print_board(void) {
-  const char player_1 = 'X', player_2 = 'O';
+  const char player_1_char = 'X', player_2_char = 'O';
 
   for (int row = 0; row < N + 2; row++) { // + 2 for number rows
     for (int col = 0; col < M + 2; col++) { // + 2 for number cols
@@ -61,8 +34,8 @@ void print_board(void) {
       }
 
       char cell = ' ';
-      if (board[row - 1][col - 1] == 1) cell = player_1;
-      if (board[row - 1][col - 1] == 2) cell = player_2;
+      if (get_cell(col, row) == PLAYER_1) cell = player_1_char;
+      if (get_cell(col, row) == PLAYER_2) cell = player_2_char;
       printf(" %c ", cell); // cell
       if (col > 0 && col < M) printf("|"); // vertical separator
     }
@@ -80,21 +53,21 @@ void print_board(void) {
 }
 
 int main(void) {
-  bool player_2_turn = false;
+  uint8_t x_pos, y_pos;
+  board_init(M, N);
+  game_init(K, P, Q);
   print_board();
 
-  for (int q = 0; q < Q; q++) {
-    get_next_entry(player_2_turn);
+  do {
+    do {
+      printf("Player: %d\n", current_player());
+      printf("Enter x-position: ");
+      x_pos = get_input();
+
+      printf("Enter y-position: ");
+      y_pos = get_input();
+      printf("\n");
+    } while (!set_cell(x_pos, y_pos, current_player()));
     print_board();
-  }
-  player_2_turn = true;
-
-  while (true) {
-    for (int p = 0; p < P; p++) {
-      get_next_entry(player_2_turn);
-      print_board();
-    }
-    player_2_turn = !player_2_turn;
-  }
+  } while (!check_win(x_pos, y_pos) && marks_left());
 }
-
