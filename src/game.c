@@ -22,9 +22,31 @@ uint8_t marks_left(void) {
     return marks_left_count;
 }
 
-bool check_win(uint8_t x, uint8_t y) {
+bool check_win(uint8_t new_mark_x, uint8_t new_mark_y) {
     marks_left_count--;
-    // TODO: Implement actual win-checking
-    if (x || y) return false; // remove useless usage of x and y to avoid compilation errors
-    return false;
+    int max = 1;
+    for (int i = 0; i <= 1; i++) {
+      for (int j = (i > 0) ? -1 : 0; j <= 1; j++) {
+        if (i == 0 && j == 0) continue;
+        int x = new_mark_x, y = new_mark_y, marks_in_a_row = 0;
+        while (get_cell(x, y) == active_player && marks_in_a_row <= k) {
+          marks_in_a_row++;
+          x += i;
+          y += j;
+        }
+        if (marks_in_a_row == k) return true;
+        // reset x and y to initial position to keep checking in opposite direction
+        // also reduce marks_in_a_row as the first loop iteration is always hit
+        x = new_mark_x;
+        y = new_mark_y;
+        marks_in_a_row--;
+        while (get_cell(x, y) == active_player && marks_in_a_row <= k) {
+          marks_in_a_row++;
+          x -= i;
+          y -= j;
+        }
+        max = (marks_in_a_row > max) ? marks_in_a_row : max;
+      }
+    }
+    return max >= k;
 }

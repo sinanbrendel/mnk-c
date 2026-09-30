@@ -16,7 +16,7 @@ long get_input(void) {
       while ((c = getchar()) != '\n' && c != EOF); // empty out stdin
     }
   }
-  return strtol(buffer, NULL, 10);
+  return strtol(buffer, NULL, 10) - 1; // printed board is 1 indexed, internals are 0
 }
 
 void print_board(void) {
@@ -24,28 +24,23 @@ void print_board(void) {
 
   for (int row = 0; row < N + 2; row++) { // + 2 for number rows
     for (int col = 0; col < M + 2; col++) { // + 2 for number cols
-      if ((row <= 0 || row >= N + 1) && !(col <= 0 || col >= M + 1)) { // number rows
-        printf(" %.2d ", col);
+      if (row == 0 || row == N + 1) { // number rows
+        if (col == 0 || col == M + 1) {
+          printf("   ");
+          continue;
+        }
+        printf(" %02d", col);
         continue;
       }
-      if ((col <= 0 || col >= M + 1) && !(row <= 0 || row >= N + 1)) { // number cols
-        printf(" %.2d ", row);
+      if (col == 0 || col == M + 1) { // number cols
+        printf(" %02d ", row);
         continue;
       }
 
-      char cell = ' ';
-      if (get_cell(col, row) == PLAYER_1) cell = player_1_char;
-      if (get_cell(col, row) == PLAYER_2) cell = player_2_char;
+      char cell = '.';
+      if (get_cell(col - 1, row - 1) == PLAYER_1) cell = player_1_char;
+      if (get_cell(col - 1, row - 1) == PLAYER_2) cell = player_2_char;
       printf(" %c ", cell); // cell
-      if (col > 0 && col < M) printf("|"); // vertical separator
-    }
-    printf("\n");
-
-    if (row < 1 || row > N - 1) continue; // skip horizontal separator
-    for (int col = 0; col < M; col++) {
-      if (col == 0) printf("    "); // offset to match numbered rows
-      printf("---");
-      if (col < M - 1) printf("+");
     }
     printf("\n");
   }
@@ -70,4 +65,8 @@ int main(void) {
     } while (!set_cell(x_pos, y_pos, current_player()));
     print_board();
   } while (!check_win(x_pos, y_pos) && marks_left());
+
+  printf("You won!");
+  return 0;
 }
+

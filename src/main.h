@@ -2,7 +2,7 @@
 #define MAIN_H
 
 #define M 15
-#define N 10
+#define N 15
 #define K 5
 #define P 2
 #define Q 1
